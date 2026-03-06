@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+backend/node_modules/
+frontend/node_modules/
+*.pdf
+*.docx

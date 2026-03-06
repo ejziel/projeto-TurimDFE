@@ -1,0 +1,45 @@
+import { Timestamp } from 'firebase-admin/firestore';
+
+export interface DFeDocument {
+  tenantId: string;
+  cnpjDestinatario: string;
+  nsu: string;
+  tipo: 'nfe' | 'cte' | 'nfse' | 'cteos';
+  chaveAcesso: string;
+  numero: number;
+  serie: number;
+  emitCnpj: string;
+  emitNome: string;
+  emitFantasia: string;
+  emitUf: string;
+  emitIe: string;
+  destCnpj: string;
+  destNome: string;
+  destUf: string;
+  valorTotal: number;
+  valorProdutos: number;
+  valorDesconto: number;
+  valorFrete: number;
+  valorIcms: number;
+  dataEmissao: Timestamp;
+  dataRecebimento: Timestamp;
+  dataColeta: Timestamp;
+  situacao: 'autorizada' | 'cancelada' | 'denegada';
+  statusManifestacao: string | null;
+  protocoloAutorizacao: string;
+  naturezaOperacao: string;
+  tipoNota: number;
+  finalidade: number;
+  cfopPrincipal: string;
+  papel: 'emitente' | 'destinatario' | 'terceiro';
+  temXmlCompleto: boolean;
+  temPdf: boolean;
+  xmlStoragePath: string | null;
+  pdfStoragePath: string | null;
+  schemaOrigem: string;
+  totalEventos: number;
+  ultimoEvento: string | null;
+  ultimoEventoAt: Timestamp | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}

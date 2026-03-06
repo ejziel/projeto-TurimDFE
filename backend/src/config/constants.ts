@@ -1,0 +1,150 @@
+export const UF_CODES: Record<string, number> = {
+  AC: 12, AL: 27, AP: 16, AM: 13, BA: 29,
+  CE: 23, DF: 53, ES: 32, GO: 52, MA: 21,
+  MT: 51, MS: 50, MG: 31, PA: 15, PB: 25,
+  PR: 41, PE: 26, PI: 22, RJ: 33, RN: 24,
+  RS: 43, RO: 11, RR: 14, SC: 42, SP: 35,
+  SE: 28, TO: 17,
+};
+
+export const UF_WEIGHTS: [string, number][] = [
+  ['SP', 0.30], ['MG', 0.12], ['RJ', 0.10], ['PR', 0.08], ['RS', 0.07],
+  ['SC', 0.06], ['BA', 0.05], ['GO', 0.04], ['PE', 0.03], ['CE', 0.03],
+  ['ES', 0.02], ['MT', 0.02], ['MS', 0.02], ['PA', 0.02], ['DF', 0.01],
+  ['AM', 0.01], ['MA', 0.01], ['RN', 0.01],
+];
+
+export const COMPANY_NAMES = [
+  'Distribuidora Alimentos Brasil Ltda',
+  'Metalurgica Aco Forte S.A.',
+  'Transportadora Rodoviaria Nacional Ltda',
+  'Industria Quimica Paulista S.A.',
+  'Comercio de Pecas Automotivas MG Ltda',
+  'Supermercados Rede Economia S.A.',
+  'Textil Fibras do Sul Ltda',
+  'Farmacia e Drogaria Saude Total Ltda',
+  'Construtora e Incorporadora Edificar S.A.',
+  'Agropecuaria Fazenda Verde Ltda',
+  'Eletronica Digital Norte S.A.',
+  'Papelaria e Embalagens Central Ltda',
+  'Atacadista Comercial Lider Ltda',
+  'Industria de Bebidas Tropical S.A.',
+  'Ferramentas e Equipamentos Titan Ltda',
+  'Ceramica e Revestimentos Sol Ltda',
+  'Plasticos e Embalagens Flex S.A.',
+  'Madeireira Florestas Unidas Ltda',
+  'Auto Pecas Reparos Express Ltda',
+  'Laboratorio Farmaceutico Vida S.A.',
+  'Cosmeticos e Perfumaria Beleza Ltda',
+  'Tecidos e Confeccoes Moda Ltda',
+  'Distribuidora de Combustiveis Petro Ltda',
+  'Grafica e Editora Moderna S.A.',
+  'Industria de Moveis Design Ltda',
+  'Materiais de Construcao Obra Prima Ltda',
+  'Comercio de Eletrodomesticos Casa Ltda',
+  'Alimentos Congelados Polo Norte Ltda',
+  'Quimica Industrial Reagentes S.A.',
+  'Tecnologia da Informacao Cloud Ltda',
+  'Industria de Calcados Passo Firme Ltda',
+  'Distribuidora de Medicamentos Farma Ltda',
+  'Comercio de Informatica ByteShop Ltda',
+  'Siderurgica Minas Gerais S.A.',
+  'Industria Textil Algodao Fino Ltda',
+  'Comercio de Materiais Eletricos Ampere Ltda',
+  'Frigorifico Carnes Nobres S.A.',
+  'Distribuidora de Hortifruti Campo Verde Ltda',
+  'Industria de Embalagens PackPro S.A.',
+  'Comercio de Autopecas Turbo Ltda',
+  'Industria de Laticinios Serra da Mantiqueira Ltda',
+  'Comercio de Ferragens e Parafusos Fix Ltda',
+  'Distribuidora de Papeis e Celulose Ltda',
+  'Industria de Tintas e Vernizes Color S.A.',
+  'Comercio Atacadista de Cereais Grao Ltda',
+  'Fabrica de Brinquedos Alegria S.A.',
+  'Distribuidora de Produtos de Limpeza Clean Ltda',
+  'Industria de Borrachas e Vedacoes Flex Ltda',
+  'Comercio de Suplementos NutriForce Ltda',
+  'Industria de Vidros e Cristais Vitrum S.A.',
+];
+
+export const TRADE_NAMES = [
+  'Brasil Alimentos', 'Aco Forte', 'Rodoviaria Nacional', 'Quimica Paulista',
+  'Auto Pecas MG', 'Rede Economia', 'Fibras do Sul', 'Saude Total',
+  'Edificar', 'Fazenda Verde', 'Digital Norte', 'Embalagens Central',
+  'Atacadista Lider', 'Tropical Bebidas', 'Titan Ferramentas', 'Sol Ceramica',
+  'Flex Plasticos', 'Florestas Unidas', 'Reparos Express', 'Lab Vida',
+  'Beleza Cosmeticos', 'Moda Tecidos', 'Petro Combustiveis', 'Moderna Grafica',
+  'Design Moveis', 'Obra Prima', 'Casa Eletro', 'Polo Norte Congelados',
+  'Reagentes Quimica', 'Cloud TI', 'Passo Firme', 'FarmaDist',
+  'ByteShop', 'Siderurgica MG', 'Algodao Fino', 'Ampere Eletricos',
+  'Carnes Nobres', 'Campo Verde', 'PackPro', 'Turbo Autopecas',
+  'Serra Laticinios', 'Fix Ferragens', 'Celulose Dist', 'Color Tintas',
+  'Grao Cereais', 'Alegria Brinquedos', 'Clean Limpeza', 'Flex Borrachas',
+  'NutriForce', 'Vitrum Vidros',
+];
+
+export const NATUREZAS_OPERACAO = [
+  'VENDA DE MERCADORIA',
+  'VENDA DE PRODUCAO DO ESTABELECIMENTO',
+  'COMPRA PARA INDUSTRIALIZACAO',
+  'COMPRA PARA COMERCIALIZACAO',
+  'TRANSFERENCIA DE MERCADORIA',
+  'DEVOLUCAO DE COMPRA',
+  'DEVOLUCAO DE VENDA',
+  'REMESSA PARA CONSERTO',
+  'RETORNO DE CONSERTO',
+  'REMESSA PARA DEMONSTRACAO',
+  'BONIFICACAO',
+  'VENDA DE ATIVO IMOBILIZADO',
+  'PRESTACAO DE SERVICO DE TRANSPORTE',
+  'REMESSA PARA DEPOSITO',
+  'RETORNO DE DEPOSITO',
+];
+
+export const CFOPS = [
+  '1102', '1403', '1556', '1949', '2102', '2403', '2556', '2949',
+  '5102', '5403', '5405', '5556', '5910', '5949',
+  '6102', '6403', '6404', '6556', '6910', '6949',
+  '1202', '1411', '2202', '5202', '5411', '6202',
+  '5353', '5932', '6353', '6932',
+];
+
+export const EVENT_TYPES = [
+  { code: '210210', desc: 'Ciencia da Operacao', weight: 0.40 },
+  { code: '210200', desc: 'Confirmacao da Operacao', weight: 0.25 },
+  { code: '110111', desc: 'Cancelamento', weight: 0.15 },
+  { code: '110110', desc: 'Carta de Correcao', weight: 0.10 },
+  { code: '210220', desc: 'Desconhecimento da Operacao', weight: 0.05 },
+  { code: '210240', desc: 'Operacao Nao Realizada', weight: 0.05 },
+];
+
+export const SEED_VOLUMES: Record<string, { docs: number; events: number; tenants: number; cnpjsPerTenant: number }> = {
+  '1k':   { docs: 1000,      events: 200,     tenants: 2,  cnpjsPerTenant: 3  },
+  '10k':  { docs: 10000,     events: 2000,    tenants: 5,  cnpjsPerTenant: 5  },
+  '50k':  { docs: 50000,     events: 10000,   tenants: 8,  cnpjsPerTenant: 6  },
+  '100k': { docs: 100000,    events: 20000,   tenants: 10, cnpjsPerTenant: 8  },
+  '250k': { docs: 250000,    events: 50000,   tenants: 15, cnpjsPerTenant: 9  },
+  '500k': { docs: 500000,    events: 100000,  tenants: 20, cnpjsPerTenant: 10 },
+  '1m':   { docs: 1000000,   events: 200000,  tenants: 30, cnpjsPerTenant: 12 },
+  '2m':   { docs: 2000000,   events: 400000,  tenants: 40, cnpjsPerTenant: 15 },
+  '5m':   { docs: 5000000,   events: 1000000, tenants: 50, cnpjsPerTenant: 20 },
+};
+
+export const JUSTIFICATIVAS_CANCELAMENTO = [
+  'Erro no valor da nota fiscal',
+  'Dados do destinatario incorretos',
+  'Duplicidade de emissao',
+  'Operacao cancelada pelo cliente',
+  'Produto nao disponivel em estoque',
+  'Erro na aliquota de ICMS',
+  'Pedido cancelado antes do envio',
+];
+
+export const CORRECOES_CARTA = [
+  'Correcao do endereco de entrega',
+  'Retificacao da inscricao estadual do destinatario',
+  'Correcao da natureza da operacao',
+  'Ajuste no CFOP informado',
+  'Correcao dos dados de transporte',
+  'Retificacao do peso bruto e liquido',
+];
