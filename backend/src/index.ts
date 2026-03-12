@@ -3,6 +3,7 @@ import cors from 'cors';
 import { healthRoutes } from './routes/health.routes';
 import { seedRoutes } from './routes/seed.routes';
 import { benchmarkRoutes } from './routes/benchmark.routes';
+import { validationRoutes } from './routes/validation.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,8 +14,9 @@ app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/benchmarks', benchmarkRoutes);
+app.use('/api/validation', validationRoutes);
 
 app.listen(PORT, () => {
-  console.log(`TurimDFE Benchmark Backend running on port ${PORT}`);
-  console.log(`Firestore Emulator: ${process.env.FIRESTORE_EMULATOR_HOST || 'not configured'}`);
+    console.log(`TurimDFE Benchmark Backend running on port ${PORT}`);
+    console.log(`Firestore Emulator: ${process.env.FIRESTORE_EMULATOR_HOST || 'not configured'}`);
 });

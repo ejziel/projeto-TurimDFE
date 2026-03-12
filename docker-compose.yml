@@ -10,7 +10,7 @@ services:
       - firebase-data:/opt/firebase/data
     environment:
       - FIRESTORE_PROJECT_ID=turimdfe-benchmark
-      - JAVA_TOOL_OPTIONS=-Xmx4g
+      - JAVA_TOOL_OPTIONS=-Xmx8g -XX:+UseG1GC
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000"]
       interval: 10s
@@ -31,6 +31,7 @@ services:
       - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
       - FIREBASE_PROJECT_ID=turimdfe-benchmark
       - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=8192 --expose-gc
     depends_on:
       firebase-emulator:
         condition: service_healthy

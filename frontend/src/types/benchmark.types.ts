@@ -71,3 +71,34 @@ export interface HealthStatus {
   uptime: number;
   timestamp: string;
 }
+
+export interface ValidationThresholds {
+  maxMeanLatencyMs: number;
+  maxP95LatencyMs: number;
+  maxP99LatencyMs: number;
+  minOpsPerSecond: number;
+  maxErrorRate: number;
+}
+
+export interface ValidationIssue {
+  result: BenchmarkResult;
+  violations: {
+    field: string;
+    label: string;
+    value: number;
+    threshold: number;
+    severity: 'warning' | 'critical';
+  }[];
+}
+
+export const DEFAULT_THRESHOLDS: Record<string, ValidationThresholds> = {
+  'insert-single': { maxMeanLatencyMs: 50, maxP95LatencyMs: 100, maxP99LatencyMs: 200, minOpsPerSecond: 20, maxErrorRate: 0.01 },
+  'insert-batch': { maxMeanLatencyMs: 200, maxP95LatencyMs: 500, maxP99LatencyMs: 1000, minOpsPerSecond: 5, maxErrorRate: 0.01 },
+  'query-filters': { maxMeanLatencyMs: 100, maxP95LatencyMs: 300, maxP99LatencyMs: 500, minOpsPerSecond: 10, maxErrorRate: 0.01 },
+  'query-pagination': { maxMeanLatencyMs: 150, maxP95LatencyMs: 400, maxP99LatencyMs: 600, minOpsPerSecond: 8, maxErrorRate: 0.01 },
+  'query-volume': { maxMeanLatencyMs: 200, maxP95LatencyMs: 500, maxP99LatencyMs: 800, minOpsPerSecond: 5, maxErrorRate: 0.02 },
+  'concurrent': { maxMeanLatencyMs: 300, maxP95LatencyMs: 800, maxP99LatencyMs: 1500, minOpsPerSecond: 3, maxErrorRate: 0.05 },
+  'counter-increment': { maxMeanLatencyMs: 100, maxP95LatencyMs: 300, maxP99LatencyMs: 500, minOpsPerSecond: 10, maxErrorRate: 0.02 },
+  'index-effectiveness': { maxMeanLatencyMs: 80, maxP95LatencyMs: 200, maxP99LatencyMs: 400, minOpsPerSecond: 15, maxErrorRate: 0.01 },
+  default: { maxMeanLatencyMs: 150, maxP95LatencyMs: 400, maxP99LatencyMs: 800, minOpsPerSecond: 5, maxErrorRate: 0.05 },
+};

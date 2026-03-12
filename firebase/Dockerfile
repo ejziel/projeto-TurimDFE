@@ -1,8 +1,13 @@
 FROM node:22-slim
 
 RUN apt-get update && apt-get install -y \
-    openjdk-17-jre-headless \
     curl \
+    gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update && apt-get install -y \
+    temurin-21-jre \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g firebase-tools@latest

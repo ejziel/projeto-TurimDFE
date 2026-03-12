@@ -4,18 +4,24 @@ import Dashboard from './components/Dashboard';
 import SeedControl from './components/SeedControl';
 import BenchmarkRunner from './components/BenchmarkRunner';
 import ResultsTable from './components/ResultsTable';
+import ValidationView from './components/ValidationView';
+import AIReport from './components/AIReport';
+import AutoBenchmark from './components/AutoBenchmark';
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/seed" element={<SeedControl />} />
-          <Route path="/benchmarks" element={<BenchmarkRunner />} />
-          <Route path="/results" element={<ResultsTable />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route element={<Layout />}>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/seed" element={<SeedControl />} />
+                    <Route path="/benchmarks" element={<BenchmarkRunner />} />
+                    <Route path="/results" element={<ResultsTable />} />
+                    <Route path="/validation" element={<ValidationView />} />
+                    <Route path="/ai-report" element={<AIReport />} />
+                    <Route path="/auto" element={<AutoBenchmark />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    );
 }
