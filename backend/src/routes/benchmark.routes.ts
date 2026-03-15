@@ -13,6 +13,8 @@ import { runCounterIncrementBenchmark } from '../benchmarks/counter-increment.be
 import { runIndexEffectivenessBenchmark } from '../benchmarks/index-effectiveness.bench';
 import { BenchmarkResult } from '../models/benchmark-result.model';
 import { runAutoBenchmark, getAutoProgress, getAllAutoRuns } from '../benchmarks/auto-benchmark';
+import { runGcpValidation } from '../benchmarks/gcp-validation.bench';
+import { runCountPaginationBenchmark } from '../benchmarks/count-pagination.bench';
 
 export const benchmarkRoutes = Router();
 
@@ -116,6 +118,70 @@ benchmarkRoutes.get('/results/:runId', (req, res) => {
     const results = getResultsByRunId(req.params.runId);
     if (results.length === 0) return res.status(404).json({ error: 'No results found' });
     res.json(results);
+});
+
+// ====== Count + Pagination Benchmark ======
+
+const countPaginationResults: Map<string, any> = new Map();
+
+benchmarkRoutes.post('/run/count-pagination', (req, res) => {
+    const { iterations = 3, pageSize = 20 } = req.body ?? {};
+    const run = createRun('count-pagination');
+    res.json({ runId: run.runId, status: 'running', message: 'Count + pagination benchmark started' });
+
+    runCountPaginationBenchmark({ iterations, pageSize })
+        .then((result) => {
+            countPaginationResults.set(run.runId, result);
+            completeRun(run.runId, []);
+        })
+        .catch((err) => failRun(run.runId, err.message));
+});
+
+benchmarkRoutes.get('/count-pagination/:runId', (req, res) => {
+    const run = getRun(req.params.runId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    res.json({ ...run, result: countPaginationResults.get(req.params.runId) ?? null });
+});
+
+benchmarkRoutes.get('/count-pagination-latest', (_req, res) => {
+    const entries = [...countPaginationResults.entries()];
+    if (entries.length === 0) return res.status(404).json({ error: 'No results yet' });
+    const [runId, result] = entries[entries.length - 1];
+    res.json({ runId, ...result });
+});
+
+// ====== GCP Validation ======
+
+// In-memory store for GCP validation results (separate from BenchmarkResult[])
+const gcpValidationResults: Map<string, any> = new Map();
+
+benchmarkRoutes.post('/run/gcp-validation', (req, res) => {
+    const iterations = req.body?.iterations ?? 5;
+    const run = createRun('gcp-validation');
+    res.json({ runId: run.runId, status: 'running', message: 'GCP validation started' });
+
+    runGcpValidation({ iterations })
+        .then((result) => {
+            gcpValidationResults.set(run.runId, result);
+            completeRun(run.runId, []);
+        })
+        .catch((err) => {
+            failRun(run.runId, err.message);
+        });
+});
+
+benchmarkRoutes.get('/gcp-validation/:runId', (req, res) => {
+    const run = getRun(req.params.runId);
+    if (!run) return res.status(404).json({ error: 'Run not found' });
+    const result = gcpValidationResults.get(req.params.runId);
+    res.json({ ...run, gcpValidation: result ?? null });
+});
+
+benchmarkRoutes.get('/gcp-validation-latest', (_req, res) => {
+    const entries = [...gcpValidationResults.entries()];
+    if (entries.length === 0) return res.status(404).json({ error: 'No GCP validation results yet' });
+    const [runId, result] = entries[entries.length - 1];
+    res.json({ runId, ...result });
 });
 
 // ====== Auto Benchmark (Seed + Run All + Report) ======

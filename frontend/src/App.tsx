@@ -7,6 +7,8 @@ import ResultsTable from './components/ResultsTable';
 import ValidationView from './components/ValidationView';
 import AIReport from './components/AIReport';
 import AutoBenchmark from './components/AutoBenchmark';
+import GcpValidation from './components/GcpValidation';
+import DocumentGrid from './components/DocumentGrid';
 
 export default function App() {
     return (
@@ -20,6 +22,8 @@ export default function App() {
                     <Route path="/validation" element={<ValidationView />} />
                     <Route path="/ai-report" element={<AIReport />} />
                     <Route path="/auto" element={<AutoBenchmark />} />
+                    <Route path="/gcp-validation" element={<GcpValidation />} />
+                    <Route path="/documents" element={<DocumentGrid />} />
                 </Route>
             </Routes>
         </BrowserRouter>

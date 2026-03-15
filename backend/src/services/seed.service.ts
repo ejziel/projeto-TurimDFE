@@ -1,10 +1,11 @@
 import { db } from '../config/firebase';
-import { SEED_VOLUMES } from '../config/constants';
+import { SEED_VOLUMES, GCP_SEED_VOLUMES } from '../config/constants';
 import { generateTenants, GeneratedTenant } from '../generators/tenant.generator';
 import { generateDocumentData } from '../generators/nfe.generator';
 import { generateEventsForDocument } from '../generators/event.generator';
 import { NSUSequencer, generateNSUControlDoc } from '../generators/nsu.generator';
 import { randomInt } from '../generators/helpers';
+import { backfillCounters } from './counter.service';
 
 export interface SeedProgress {
     status: 'idle' | 'seeding' | 'completed' | 'error';
@@ -48,7 +49,7 @@ function updateProgress(update: Partial<SeedProgress>) {
 }
 
 async function writeBatch(docs: { collection: string; id?: string; data: Record<string, any> }[]): Promise<void> {
-    const BATCH_LIMIT = 500;
+    const BATCH_LIMIT = 499;
     for (let i = 0; i < docs.length; i += BATCH_LIMIT) {
         const chunk = docs.slice(i, i + BATCH_LIMIT);
         const batch = db.batch();
@@ -62,9 +63,38 @@ async function writeBatch(docs: { collection: string; id?: string; data: Record<
     }
 }
 
+// BulkWriter: alta throughput para grandes volumes (GCP).
+// Gerencia até 500 writes paralelos com rate limiting automático.
+// Flush periódico a cada FLUSH_EVERY docs evita acúmulo excessivo em memória.
+async function bulkWrite(
+    generator: () => Generator<{ collection: string; id?: string; data: Record<string, any> }>,
+    total: number,
+    onProgress: (done: number) => void,
+    flushEvery = 10_000,
+): Promise<void> {
+    const bw = db.bulkWriter();
+    bw.onWriteError((err) => err.failedAttempts < 5);
+
+    let done = 0;
+    for (const doc of generator()) {
+        const ref = doc.id
+            ? db.collection(doc.collection).doc(doc.id)
+            : db.collection(doc.collection).doc();
+        bw.set(ref, doc.data);
+
+        done++;
+        if (done % flushEvery === 0) {
+            await bw.flush();
+            onProgress(done);
+        }
+    }
+    await bw.close();
+    onProgress(done);
+}
+
 export async function seedData(volume: string): Promise<void> {
-    const config = SEED_VOLUMES[volume];
-    if (!config) throw new Error(`Invalid volume: ${volume}. Valid: ${Object.keys(SEED_VOLUMES).join(', ')}`);
+    const config = SEED_VOLUMES[volume] ?? GCP_SEED_VOLUMES[volume];
+    if (!config) throw new Error(`Invalid volume: ${volume}. Valid: ${[...Object.keys(SEED_VOLUMES), ...Object.keys(GCP_SEED_VOLUMES)].join(', ')}`);
 
     if (currentProgress.status === 'seeding') {
         throw new Error('Seeding already in progress');
@@ -126,76 +156,46 @@ export async function seedData(volume: string): Promise<void> {
             }
         }
 
-        // Para volumes 250K+, reduzir paralelismo para evitar OOM
-        const isLargeVolume = config.docs > 200000;
-        const PARALLEL_BATCHES = isLargeVolume ? 2 : 5;
-        const BATCH_SIZE = 500;
-        let docsSeeded = 0;
+        // Captura refs durante a geração — evita query ao Firestore na fase de events
+        const MAX_EVENT_REFS = 10_000;
+        const eventDocRefs: { id: string; tenantId: string; chaveAcesso: string; dataColeta: Date }[] = [];
 
-        // Generate and write in chunks
-        for (let i = 0; i < config.docs; i += BATCH_SIZE * PARALLEL_BATCHES) {
-            const batchPromises: Promise<void>[] = [];
-
-            for (let b = 0; b < PARALLEL_BATCHES && (i + b * BATCH_SIZE) < config.docs; b++) {
-                const start = i + b * BATCH_SIZE;
-                const end = Math.min(start + BATCH_SIZE, config.docs);
-                const batchDocs: { collection: string; data: Record<string, any> }[] = [];
-
-                for (let j = start; j < end; j++) {
-                    const pair = tenantCnpjPairs[j % tenantCnpjPairs.length];
-                    const cnpjInfo = pair.tenant.cnpjs[pair.cnpjIdx];
-                    const docData = generateDocumentData(pair.tenant.id, cnpjInfo, nsuSequencer, j);
-                    batchDocs.push({ collection: 'documents', data: docData });
+        function* docGenerator() {
+            for (let i = 0; i < config.docs; i++) {
+                const pair = tenantCnpjPairs[i % tenantCnpjPairs.length];
+                const cnpjInfo = pair.tenant.cnpjs[pair.cnpjIdx];
+                const docData = generateDocumentData(pair.tenant.id, cnpjInfo, nsuSequencer, i);
+                const ref = db.collection('documents').doc();
+                if (eventDocRefs.length < MAX_EVENT_REFS) {
+                    eventDocRefs.push({ id: ref.id, tenantId: docData.tenantId, chaveAcesso: docData.chaveAcesso, dataColeta: docData.dataColeta });
                 }
-
-                batchPromises.push(writeBatch(batchDocs));
-            }
-
-            await Promise.all(batchPromises);
-            docsSeeded = Math.min(i + BATCH_SIZE * PARALLEL_BATCHES, config.docs);
-            updateProgress({ seededDocs: docsSeeded, phase: `Seeding documents... ${docsSeeded}/${config.docs}` });
-
-            // Dar tempo ao GC para limpar buffers gRPC em volumes grandes
-            if (isLargeVolume && docsSeeded % 50000 === 0) {
-                if ((globalThis as any).gc) (globalThis as any).gc();
-                await new Promise<void>(resolve => { (globalThis as any).setTimeout(resolve, 100); });
+                yield { collection: 'documents', id: ref.id, data: docData };
             }
         }
 
-        // Phase 3: Seed events
+        await bulkWrite(
+            docGenerator,
+            config.docs,
+            (done) => updateProgress({ seededDocs: done, phase: `Seeding documents... ${done}/${config.docs}` }),
+        );
+
+        // Phase 3: Seed events (usa refs capturadas durante a geração — sem query extra ao Firestore)
         updateProgress({ phase: 'Seeding events...' });
-        let eventsSeeded = 0;
 
-        // Get some document IDs to link events to
-        const docSnapshots = await db.collection('documents').limit(Math.min(config.docs, 10000)).get();
-        const docRefs = docSnapshots.docs.map((d) => ({
-            id: d.id,
-            tenantId: d.data().tenantId as string,
-            chaveAcesso: d.data().chaveAcesso as string,
-            dataColeta: (d.data().dataColeta as any).toDate() as Date,
-        }));
-
-        for (let i = 0; i < config.events; i += BATCH_SIZE * PARALLEL_BATCHES) {
-            const batchPromises: Promise<void>[] = [];
-
-            for (let b = 0; b < PARALLEL_BATCHES && (i + b * BATCH_SIZE) < config.events; b++) {
-                const start = i + b * BATCH_SIZE;
-                const end = Math.min(start + BATCH_SIZE, config.events);
-                const batchEvents: { collection: string; data: Record<string, any> }[] = [];
-
-                for (let j = start; j < end; j++) {
-                    const docRef = docRefs[j % docRefs.length];
-                    const events = generateEventsForDocument(docRef.tenantId, docRef.chaveAcesso, docRef.id, docRef.dataColeta, 1);
-                    batchEvents.push({ collection: 'events', data: events[0] });
-                }
-
-                batchPromises.push(writeBatch(batchEvents));
+        function* eventGenerator() {
+            for (let i = 0; i < config.events; i++) {
+                const docRef = eventDocRefs[i % eventDocRefs.length];
+                const events = generateEventsForDocument(docRef.tenantId, docRef.chaveAcesso, docRef.id, docRef.dataColeta, 1);
+                yield { collection: 'events', data: events[0] };
             }
-
-            await Promise.all(batchPromises);
-            eventsSeeded = Math.min(i + BATCH_SIZE * PARALLEL_BATCHES, config.events);
-            updateProgress({ seededEvents: eventsSeeded, phase: `Seeding events... ${eventsSeeded}/${config.events}` });
         }
+
+        await bulkWrite(
+            eventGenerator,
+            config.events,
+            (done) => updateProgress({ seededEvents: done, phase: `Seeding events... ${done}/${config.events}` }),
+            5_000,
+        );
 
         // Phase 4: Seed NSU control
         updateProgress({ phase: 'Seeding NSU control...' });
@@ -214,9 +214,17 @@ export async function seedData(volume: string): Promise<void> {
         }
         await writeBatch(nsuDocs);
 
+        // Phase 5: Auto-backfill distributed counters
+        updateProgress({ phase: 'Building distributed counters...' });
+        try {
+            await backfillCounters();
+        } catch (err: any) {
+            console.warn('[seed] Counter backfill failed (non-fatal):', err.message);
+        }
+
         updateProgress({
             status: 'completed',
-            phase: 'Seeding completed!',
+            phase: 'Seeding completed! (with counters)',
             completedAt: Date.now(),
             seededDocs: config.docs,
             seededEvents: config.events,

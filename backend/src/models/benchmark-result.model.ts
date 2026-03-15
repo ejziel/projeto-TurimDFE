@@ -35,6 +35,9 @@ export interface BenchmarkResult {
       heapTotal: number;
       rss: number;
     };
+    mode?: 'emulator' | 'gcp';
+    firestoreReads?: number;
+    docsReturnedPerQuery?: number;
   };
 }
 

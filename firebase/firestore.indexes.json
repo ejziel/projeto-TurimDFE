@@ -253,6 +253,60 @@
             ]
         },
         {
+            "collectionGroup": "documents",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "tenantId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "tipo_situacao",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "dataEmissao",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "documents",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "tenantId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "tipo_situacao",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "yearMonth",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "documents",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "tenantId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "yearMonth",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "valorTotal",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
             "collectionGroup": "events",
             "queryScope": "COLLECTION",
             "fields": [

@@ -118,6 +118,12 @@ export const EVENT_TYPES = [
   { code: '210240', desc: 'Operacao Nao Realizada', weight: 0.05 },
 ];
 
+export const GCP_SEED_VOLUMES: Record<string, { docs: number; events: number; tenants: number; cnpjsPerTenant: number }> = {
+  'gcp-5k':   { docs: 5_000,   events: 1_000,  tenants: 3,  cnpjsPerTenant: 2 },
+  'gcp-50k':  { docs: 50_000,  events: 10_000, tenants: 5,  cnpjsPerTenant: 3 },
+  'gcp-500k': { docs: 500_000, events: 50_000, tenants: 10, cnpjsPerTenant: 5 },
+};
+
 export const SEED_VOLUMES: Record<string, { docs: number; events: number; tenants: number; cnpjsPerTenant: number }> = {
   '1k':   { docs: 1000,      events: 200,     tenants: 2,  cnpjsPerTenant: 3  },
   '10k':  { docs: 10000,     events: 2000,    tenants: 5,  cnpjsPerTenant: 5  },

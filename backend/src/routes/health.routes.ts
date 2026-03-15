@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../config/firebase';
+import { db, gcpMode } from '../config/firebase';
 
 export const healthRoutes = Router();
 
@@ -12,6 +12,7 @@ healthRoutes.get('/', async (_req, res) => {
     res.json({
       status: 'ok',
       firestore: 'connected',
+      gcpMode,
       emulatorHost: process.env.FIRESTORE_EMULATOR_HOST || 'not set',
       projectId: process.env.FIREBASE_PROJECT_ID || 'not set',
       uptime: process.uptime(),

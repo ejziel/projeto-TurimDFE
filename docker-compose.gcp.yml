@@ -1,0 +1,19 @@
+# GCP mode override — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.gcp.yml up --build
+#
+# Place your service account key at: credentials/sa-key.json
+# (this folder is gitignored)
+#
+# The firebase emulator still starts (satisfying the depends_on in docker-compose.yml)
+# but the backend ignores it because GCP_MODE=true routes all Firestore calls to GCP.
+
+services:
+  backend:
+    environment:
+      GCP_MODE: "true"
+      FIREBASE_PROJECT_ID: "turimdfe"
+      GOOGLE_APPLICATION_CREDENTIALS: "/credentials/sa-key.json"
+      FIRESTORE_EMULATOR_HOST: ""
+    volumes:
+      - ./backend/src:/app/src
+      - ./credentials:/credentials:ro

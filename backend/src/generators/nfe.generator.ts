@@ -101,6 +101,10 @@ export function generateDocumentData(
   const temPdf = Math.random() < 0.40;
   const totalEventos = randomInt(0, 5);
 
+  // Computed fields for optimized composite indexes
+  const tipo_situacao = `${tipo}_${situacao}`;
+  const yearMonth = `${dataEmissao.getFullYear()}-${String(dataEmissao.getMonth() + 1).padStart(2, '0')}`;
+
   return {
     tenantId,
     cnpjDestinatario: destCnpjInfo.cnpj,
@@ -126,6 +130,8 @@ export function generateDocumentData(
     dataRecebimento: Timestamp.fromDate(dataRecebimento),
     dataColeta: Timestamp.fromDate(dataColeta),
     situacao,
+    tipo_situacao,
+    yearMonth,
     statusManifestacao,
     protocoloAutorizacao: generateProtocol(),
     naturezaOperacao: randomFrom(NATUREZAS_OPERACAO),

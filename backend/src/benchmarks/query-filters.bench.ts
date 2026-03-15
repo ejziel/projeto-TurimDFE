@@ -16,92 +16,74 @@ function getDateMonthsAgo(months: number): Date {
 }
 
 const scenarios: FilterScenario[] = [
-  {
-    name: 'tenant + dataEmissao (last 30d)',
+    {
+    name: 'tenant only',
     buildQuery: (tid) => db.collection('documents')
+      .where('tenantId', '==', tid)
+    //   .orderBy('tenantId', 'desc')
+      .limit(50),
+    },
+  {
+    name: 'tenant + dataEmissao',
+    buildQuery: (tid) => db.collection('documents')
+      .where('tenantId', '>=', tid)
+      .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
+      .limit(50),
+  },
+  {
+    name: 'tipo + dataEmissao',
+    buildQuery: (tid) => db.collection('documents')
+      .where('tipo', '==', 'nfe')
+      .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
+      .where('dataEmissao', '<=', Timestamp.fromDate(getDateMonthsAgo(1)))
+    //   .orderBy('dataEmissao', 'asc')
+      .orderBy('tipo', 'desc')
+      .limit(50),
+  },
+  {
+    name: 'finalidade + dataEmissao',
+    buildQuery: (tid) => db.collection('documents')
+      .where('finalidade', '==', '1')
+      .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
+      .where('dataEmissao', '<=', Timestamp.fromDate(getDateMonthsAgo(1)))
+    //   .orderBy('finalidade', 'asc')
+      .limit(50),
+  },
+  {
+    name: 'tipo + tenant + dataEmissao',
+    buildQuery: (tid) => db.collection('documents')
+      .where('tipo', '==', 'nfe')
       .where('tenantId', '==', tid)
       .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
-      .orderBy('dataEmissao', 'desc')
+      .where('dataEmissao', '<=', Timestamp.fromDate(getDateMonthsAgo(1)))
       .limit(50),
   },
   {
-    name: 'tenant + tipo=nfe + dataEmissao',
+    name: 'tenant + finalidade + dataEmissao',
     buildQuery: (tid) => db.collection('documents')
       .where('tenantId', '==', tid)
-      .where('tipo', '==', 'nfe')
-      .orderBy('dataEmissao', 'desc')
+      .where('finalidade', '==', '1')
+      .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
+      .where('dataEmissao', '<=', Timestamp.fromDate(getDateMonthsAgo(1)))
       .limit(50),
   },
-  {
-    name: 'tenant + situacao=autorizada + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('situacao', '==', 'autorizada')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + papel=destinatario + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('papel', '==', 'destinatario')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + emitUf=SP + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('emitUf', '==', 'SP')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + statusManifestacao=ciencia + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('statusManifestacao', '==', 'ciencia')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + temXmlCompleto=false + dataColeta',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('temXmlCompleto', '==', false)
-      .orderBy('dataColeta', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + tipo=nfe + situacao=autorizada + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('tipo', '==', 'nfe')
-      .where('situacao', '==', 'autorizada')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + cfopPrincipal=5102 + dataEmissao',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .where('cfopPrincipal', '==', '5102')
-      .orderBy('dataEmissao', 'desc')
-      .limit(50),
-  },
-  {
-    name: 'tenant + valorTotal DESC (top by value)',
-    buildQuery: (tid) => db.collection('documents')
-      .where('tenantId', '==', tid)
-      .orderBy('valorTotal', 'desc')
-      .limit(50),
-  },
+  // Adiciona mais cenarios que vão estourar erros de indices, que não sejam relacionados a orderby com >=, <=, etc
+//   { 
+//     name: 'tenant + tipo + situacao + dataEmissao',
+//     buildQuery: (tid) => db.collection('documents')
+//       .where('tenantId', '==', tid)
+//       .where('tipo', '==', 'nfe')
+//       .where('situacao', '==', 'autorizada')
+//       .where('dataEmissao', '>=', Timestamp.fromDate(getDateMonthsAgo(1)))
+//       .where('dataEmissao', '<=', Timestamp.fromDate(getDateMonthsAgo(1)))
+//       .limit(50),
+//   },
 ];
 
 export async function runQueryFiltersBenchmark(config: {
   iterations?: number;
 }): Promise<BenchmarkResult[]> {
-  const iterations = config.iterations || 30;
+  const iterations = 1;
   const results: BenchmarkResult[] = [];
 
   // Get a valid tenantId from existing data
